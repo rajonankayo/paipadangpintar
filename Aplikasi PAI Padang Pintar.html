@@ -1,0 +1,633 @@
+<!doctype html>
+<html lang="id" class="h-full">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PAI Padang Pintar</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Amiri:wght@400;700&amp;display=swap"
+    rel="stylesheet">
+  <script>
+    tailwind.config = { theme: { extend: { fontFamily: { jakarta: ['"Plus Jakarta Sans"', 'sans-serif'], amiri: ['"Amiri"', 'serif'] }, colors: { emerald: { 950: '#022c22' } } } } }
+  </script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    html,
+    body {
+      height: 100%;
+      font-family: 'Plus Jakarta Sans', sans-serif
+    }
+
+    .app-wrapper {
+      height: 100%;
+      width: 100%;
+      overflow-y: auto;
+      overflow-x: hidden
+    }
+
+    .pattern-bg {
+      background-color: #064e3b;
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23065f46' fill-opacity='0.3'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")
+    }
+
+    .card-hover {
+      transition: all .3s cubic-bezier(.4, 0, .2, 1)
+    }
+
+    .card-hover:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, .15)
+    }
+
+    .fade-in {
+      animation: fadeIn .4s ease-out
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    @keyframes pulse-glow {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, .4)
+      }
+
+      50% {
+        box-shadow: 0 0 0 12px rgba(16, 185, 129, 0)
+      }
+    }
+
+    .pulse-glow {
+      animation: pulse-glow 2s infinite
+    }
+
+    .quiz-option {
+      transition: all .2s
+    }
+
+    .quiz-option:hover {
+      transform: scale(1.02)
+    }
+
+    .toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 999;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      animation: toastIn .3s ease-out
+    }
+
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0)
+      }
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #10b981;
+      border-radius: 3px
+    }
+  </style>
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+  </style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
+</head>
+
+<body class="h-full">
+  <div class="app-wrapper pattern-bg" id="app">
+    <!-- NAVIGATION BAR -->
+    <nav class="sticky top-0 z-50 bg-emerald-900/95 backdrop-blur-md border-b border-emerald-700/50 px-4 py-3"
+      id="navbar">
+      <div class="max-w-5xl mx-auto flex items-center justify-between">
+        <button onclick="goHome()" class="flex items-center gap-2 group">
+          <div
+            class="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-emerald-900 font-extrabold text-sm shadow-lg">
+            ﷲ
+          </div>
+          <div>
+            <div class="text-amber-300 font-bold text-sm leading-tight">
+              PAI Padang Pintar
+            </div>
+            <div class="text-emerald-400 text-[10px] font-medium">
+              Media Pembelajaran Interaktif
+            </div>
+          </div>
+        </button>
+        <div id="breadcrumb" class="text-emerald-300 text-xs font-medium hidden sm:block"></div>
+      </div>
+    </nav><!-- MAIN CONTENT -->
+    <main class="max-w-5xl mx-auto px-4 py-6" id="main-content"></main>
+  </div>
+  <script>
+    // ===== DATA =====
+    const KELAS_DATA = [
+      {
+        kelas: 1, emoji: "🌱", warna: "from-teal-400 to-emerald-500", border: "border-teal-400", materi: [
+          {
+            judul: "Surah Al-Fatihah", isi: "Surah Al-Fatihah adalah surah pertama dalam Al-Quran. Disebut juga Ummul Kitab (induk Al-Quran). Terdiri dari 7 ayat dan diturunkan di Mekkah.\n\n**Lafaz:**\nبِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ\nٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَـٰلَمِينَ\nٱلرَّحْمَـٰنِ ٱلرَّحِيمِ\nمَـٰلِكِ يَوْمِ ٱلدِّينِ\nإِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ\nٱهْدِنَا ٱلصِّرَٰطَ ٱلْمُسْتَقِيمَ\nصِرَٰطَ ٱلَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ ٱلْمَغْضُوبِ عَلَيْهِمْ وَلَا ٱلضَّآلِّينَ\n\nAl-Fatihah wajib dibaca setiap rakaat shalat.", soal: [
+              { q: "Berapa jumlah ayat Surah Al-Fatihah?", o: ["5", "6", "7", "8"], a: 2 },
+              { q: "Al-Fatihah disebut juga...", o: ["Ummul Quran", "Ummul Kitab", "Yasiin", "Al-Baqarah"], a: 1 },
+              { q: "Surah Al-Fatihah diturunkan di...", o: ["Madinah", "Mekkah", "Thaif", "Habasyah"], a: 1 },
+              { q: "Al-Fatihah wajib dibaca dalam setiap...", o: ["Doa", "Rakaat shalat", "Dzikir", "Ceramah"], a: 1 }
+            ]
+          },
+          {
+            judul: "Rukun Islam", isi: "Rukun Islam ada 5 perkara:\n\n1️⃣ **Syahadat** — Bersaksi bahwa tiada Tuhan selain Allah dan Muhammad utusan Allah\n2️⃣ **Shalat** — Mendirikan shalat 5 waktu\n3️⃣ **Zakat** — Menunaikan zakat\n4️⃣ **Puasa** — Berpuasa di bulan Ramadhan\n5️⃣ **Haji** — Menunaikan ibadah haji bagi yang mampu\n\nRukun Islam adalah pondasi utama dalam agama Islam yang harus dipelajari dan diamalkan.", soal: [
+              { q: "Ada berapa Rukun Islam?", o: ["3", "4", "5", "6"], a: 2 },
+              { q: "Rukun Islam yang pertama adalah...", o: ["Shalat", "Puasa", "Zakat", "Syahadat"], a: 3 },
+              { q: "Puasa dilaksanakan di bulan...", o: ["Syawal", "Ramadhan", "Rajab", "Dzulhijjah"], a: 1 },
+              { q: "Rukun Islam ke-5 adalah...", o: ["Zakat", "Puasa", "Haji", "Shalat"], a: 2 }
+            ]
+          },
+          {
+            judul: "Rukun Iman", isi: "Rukun Iman ada 6 perkara:\n\n1️⃣ Iman kepada **Allah SWT**\n2️⃣ Iman kepada **Malaikat**\n3️⃣ Iman kepada **Kitab-kitab Allah**\n4️⃣ Iman kepada **Rasul-rasul Allah**\n5️⃣ Iman kepada **Hari Akhir**\n6️⃣ Iman kepada **Qada dan Qadar**\n\nBeriman berarti meyakini dengan sepenuh hati dalam hati, diucapkan dengan lisan, dan diamalkan dengan perbuatan.", soal: [
+              { q: "Ada berapa Rukun Iman?", o: ["4", "5", "6", "7"], a: 2 },
+              { q: "Iman kepada Qada dan Qadar artinya percaya kepada...", o: ["Malaikat", "Takdir Allah", "Kitab", "Nabi"], a: 1 },
+              { q: "Rukun Iman yang ke-3 adalah iman kepada...", o: ["Malaikat", "Rasul", "Kitab-kitab Allah", "Hari Akhir"], a: 2 }
+            ]
+          },
+          {
+            judul: "Dua Kalimat Syahadat", isi: "**Syahadat Tauhid:**\nأَشْهَدُ أَنْ لَا إِلٰهَ إِلَّا اللهُ\n\"Aku bersaksi bahwa tiada Tuhan selain Allah\"\n\n**Syahadat Rasul:**\nوَأَشْهَدُ أَنَّ مُحَمَّدًا رَسُوْلُ اللهِ\n\"Dan aku bersaksi bahwa Muhammad adalah utusan Allah\"\n\nDua kalimat syahadat adalah pintu masuk ke dalam Islam dan merupakan Rukun Islam yang pertama.", soal: [
+              { q: "Syahadat ada berapa kalimat?", o: ["1", "2", "3", "4"], a: 1 },
+              { q: "Syahadat Tauhid berisi pengakuan tentang...", o: ["Keesaan Allah", "Nabi Muhammad", "Malaikat", "Kitab"], a: 0 },
+              { q: "Syahadat termasuk Rukun Islam ke...", o: ["1", "2", "3", "4"], a: 0 }
+            ]
+          }
+        ]
+      },
+      {
+        kelas: 2, emoji: "🌿", warna: "from-cyan-400 to-teal-500", border: "border-cyan-400", materi: [
+          {
+            judul: "Surah An-Naas", isi: "Surah An-Naas adalah surah ke-114 (terakhir) dalam Al-Quran. Terdiri dari 6 ayat.\n\n**Lafaz:**\nقُلْ أَعُوذُ بِرَبِّ ٱلنَّاسِ\nمَلِكِ ٱلنَّاسِ\nإِلَـٰهِ ٱلنَّاسِ\nمِن شَرِّ ٱلْوَسْوَاسِ ٱلْخَنَّاسِ\nٱلَّذِى يُوَسْوِسُ فِى صُدُورِ ٱلنَّاسِ\nمِنَ ٱلْجِنَّةِ وَٱلنَّاسِ\n\nSurah ini mengajarkan kita untuk meminta perlindungan kepada Allah dari godaan setan.", soal: [
+              { q: "Surah An-Naas terdiri dari berapa ayat?", o: ["4", "5", "6", "7"], a: 2 },
+              { q: "An-Naas berarti...", o: ["Manusia", "Subuh", "Pertolongan", "Keesaan"], a: 0 },
+              { q: "Surah An-Naas adalah surah ke...", o: ["112", "113", "114", "110"], a: 2 }
+            ]
+          },
+          {
+            judul: "Surah Al-Falaq", isi: "Surah Al-Falaq adalah surah ke-113, terdiri dari 5 ayat.\n\n**Lafaz:**\nقُلْ أَعُوذُ بِرَبِّ ٱلْفَلَقِ\nمِن شَرِّ مَا خَلَقَ\nوَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ\nوَمِن شَرِّ ٱلنَّفَّـٰثَـٰتِ فِى ٱلْعُقَدِ\nوَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ\n\nAl-Falaq berarti waktu subuh. Surah ini memohon perlindungan dari segala kejahatan.", soal: [
+              { q: "Al-Falaq berarti...", o: ["Manusia", "Waktu Subuh", "Keesaan", "Pertolongan"], a: 1 },
+              { q: "Surah Al-Falaq terdiri dari berapa ayat?", o: ["4", "5", "6", "7"], a: 1 },
+              { q: "Surah Al-Falaq adalah surah ke...", o: ["111", "112", "113", "114"], a: 2 }
+            ]
+          },
+          {
+            judul: "Asmaul Husna (Al-Quddus, Ash-Shomad, Al-Wahhab)", isi: "**Asmaul Husna** adalah nama-nama indah Allah SWT. Di antaranya:\n\n☪️ **Al-Quddus** — Yang Maha Suci\nAllah bersih dari segala kekurangan.\n\n☪️ **Ash-Shomad** — Yang Maha Dibutuhkan\nSemua makhluk membutuhkan Allah.\n\n☪️ **Al-Wahhab** — Yang Maha Pemberi\nAllah memberi tanpa mengharapkan balasan.", soal: [
+              { q: "Al-Quddus artinya...", o: ["Yang Maha Suci", "Yang Maha Pemberi", "Yang Maha Besar", "Yang Maha Esa"], a: 0 },
+              { q: "Ash-Shomad artinya...", o: ["Maha Suci", "Maha Dibutuhkan", "Maha Kuasa", "Maha Pemberi"], a: 1 },
+              { q: "Al-Wahhab artinya...", o: ["Maha Besar", "Maha Esa", "Maha Pemberi", "Maha Mengetahui"], a: 2 }
+            ]
+          },
+          {
+            judul: "Shalat Lima Waktu", isi: "Shalat wajib ada 5 waktu:\n\n🕌 **Subuh** — 2 rakaat (sebelum matahari terbit)\n🕌 **Dzuhur** — 4 rakaat (setelah matahari tergelincir)\n🕌 **Ashar** — 4 rakaat (sore hari)\n🕌 **Maghrib** — 3 rakaat (setelah matahari terbenam)\n🕌 **Isya** — 4 rakaat (malam hari)\n\nTotal: **17 rakaat** dalam sehari semalam.", soal: [
+              { q: "Shalat Subuh terdiri dari berapa rakaat?", o: ["2", "3", "4", "1"], a: 0 },
+              { q: "Total rakaat shalat wajib dalam sehari adalah...", o: ["15", "16", "17", "18"], a: 2 },
+              { q: "Shalat Maghrib terdiri dari berapa rakaat?", o: ["2", "3", "4", "1"], a: 1 }
+            ]
+          }
+        ]
+      },
+      {
+        kelas: 3, emoji: "🌳", warna: "from-blue-400 to-indigo-500", border: "border-blue-400", materi: [
+          {
+            judul: "Surah Al-Ikhlas", isi: "Surah Al-Ikhlas adalah surah ke-112, terdiri dari 4 ayat.\n\n**Lafaz:**\nقُلْ هُوَ ٱللَّهُ أَحَدٌ\nٱللَّهُ ٱلصَّمَدُ\nلَمْ يَلِدْ وَلَمْ يُولَدْ\nوَلَمْ يَكُن لَّهُۥ كُفُوًا أَحَدٌ\n\nAl-Ikhlas berarti kemurnian/keikhlasan. Membaca Al-Ikhlas 3x setara dengan membaca seluruh Al-Quran.", soal: [
+              { q: "Al-Ikhlas terdiri dari berapa ayat?", o: ["3", "4", "5", "6"], a: 1 },
+              { q: "Al-Ikhlas berarti...", o: ["Manusia", "Pertolongan", "Kemurnian", "Subuh"], a: 2 },
+              { q: "Membaca Al-Ikhlas 3x setara dengan membaca...", o: ["1 juz", "10 surah", "Seluruh Al-Quran", "Surah Yasin"], a: 2 }
+            ]
+          },
+          {
+            judul: "Sifat Wajib Allah", isi: "Allah SWT memiliki 20 sifat wajib. Beberapa di antaranya:\n\n✨ **Wujud** — Ada\n✨ **Qidam** — Dahulu/Terdahulu\n✨ **Baqa** — Kekal\n✨ **Wahdaniyah** — Esa\n✨ **Qudrah** — Kuasa\n✨ **Iradah** — Berkehendak\n✨ **Ilmu** — Mengetahui\n✨ **Hayah** — Hidup\n✨ **Sama'** — Mendengar\n✨ **Bashar** — Melihat\n\nSifat-sifat ini menunjukkan kebesaran dan kesempurnaan Allah.", soal: [
+              { q: "Wujud artinya...", o: ["Kekal", "Ada", "Esa", "Kuasa"], a: 1 },
+              { q: "Wahdaniyah artinya...", o: ["Hidup", "Mendengar", "Esa", "Kuasa"], a: 2 },
+              { q: "Baqa artinya...", o: ["Ada", "Kekal", "Esa", "Dahulu"], a: 1 }
+            ]
+          },
+          {
+            judul: "Nabi Muhammad SAW", isi: "**Nabi Muhammad SAW** adalah nabi dan rasul terakhir.\n\n📖 Lahir: 12 Rabiul Awal tahun Gajah (571 M) di Mekkah\n📖 Ayah: Abdullah bin Abdul Muthalib\n📖 Ibu: Aminah binti Wahab\n📖 Kakek: Abdul Muthalib\n📖 Diasuh oleh: Halimah As-Sa'diyah\n📖 Menerima wahyu pertama di Gua Hira\n📖 Wafat: 12 Rabiul Awal 11 H di Madinah\n\nBeliau memiliki 4 sifat utama: Shidiq, Amanah, Tabligh, Fathanah.", soal: [
+              { q: "Nabi Muhammad lahir di kota...", o: ["Madinah", "Mekkah", "Thaif", "Palestina"], a: 1 },
+              { q: "Wahyu pertama turun di...", o: ["Masjid Nabawi", "Gua Hira", "Gua Tsur", "Masjidil Haram"], a: 1 },
+              { q: "Sifat Shidiq artinya...", o: ["Dipercaya", "Jujur", "Cerdas", "Menyampaikan"], a: 1 },
+              { q: "Ibu Nabi Muhammad bernama...", o: ["Khadijah", "Halimah", "Aminah", "Fatimah"], a: 2 }
+            ]
+          },
+          {
+            judul: "Tata Cara Wudhu", isi: "Wudhu adalah syarat sahnya shalat. Urutan wudhu:\n\n1️⃣ **Niat** dalam hati\n2️⃣ Membasuh **muka** (3x)\n3️⃣ Membasuh **kedua tangan** sampai siku (3x)\n4️⃣ Mengusap **sebagian kepala** (1x)\n5️⃣ Membasuh **kedua kaki** sampai mata kaki (3x)\n6️⃣ **Tertib** (berurutan)\n\nRukun wudhu ada 6 dan wajib dilakukan secara berurutan.", soal: [
+              { q: "Berapa kali membasuh muka saat wudhu?", o: ["1x", "2x", "3x", "4x"], a: 2 },
+              { q: "Rukun wudhu ada berapa?", o: ["4", "5", "6", "7"], a: 2 },
+              { q: "Tertib artinya...", o: ["Berurutan", "Bersih", "Cepat", "Lambat"], a: 0 }
+            ]
+          }
+        ]
+      },
+      {
+        kelas: 4, emoji: "🌴", warna: "from-violet-400 to-purple-500", border: "border-violet-400", materi: [
+          {
+            judul: "Surah Al-Fil", isi: "Surah Al-Fil adalah surah ke-105 yang menceritakan tentang pasukan gajah.\n\n**Lafaz:**\nأَلَمْ تَرَ كَيْفَ فَعَلَ رَبُّكَ بِأَصْحَـٰبِ ٱلْفِيلِ\nأَلَمْ يَجْعَلْ كَيْدَهُمْ فِى تَضْلِيلٍ\nوَأَرْسَلَ عَلَيْهِمْ طَيْرًا أَبَابِيلَ\nتَرْمِيهِم بِحِجَارَةٍ مِّن سِجِّيلٍ\nفَجَعَلَهُمْ كَعَصْفٍ مَّأْكُولٍۭ\n\nPasukan Abrahah yang ingin menghancurkan Ka'bah dihancurkan oleh burung Ababil yang melempari batu dari neraka.", soal: [
+              { q: "Al-Fil berarti...", o: ["Burung", "Gajah", "Batu", "Tentara"], a: 1 },
+              { q: "Siapa yang ingin menghancurkan Ka'bah?", o: ["Fir'aun", "Abrahah", "Namrud", "Abu Lahab"], a: 1 },
+              { q: "Burung yang dikirim Allah bernama...", o: ["Hud-hud", "Ababil", "Rajawali", "Garuda"], a: 1 }
+            ]
+          },
+          {
+            judul: "Iman kepada Malaikat", isi: "Malaikat adalah makhluk Allah yang terbuat dari cahaya (nur). Malaikat selalu taat kepada Allah.\n\n**10 Malaikat yang wajib diketahui:**\n👼 **Jibril** — Menyampaikan wahyu\n👼 **Mikail** — Membagi rezeki\n👼 **Israfil** — Meniup sangkakala\n👼 **Izrail** — Mencabut nyawa\n👼 **Munkar** — Menanyai di kubur\n👼 **Nakir** — Menanyai di kubur\n👼 **Raqib** — Mencatat amal baik\n👼 **Atid** — Mencatat amal buruk\n👼 **Malik** — Menjaga neraka\n👼 **Ridwan** — Menjaga surga", soal: [
+              { q: "Malaikat terbuat dari...", o: ["Api", "Tanah", "Cahaya", "Air"], a: 2 },
+              { q: "Malaikat Jibril bertugas...", o: ["Mencabut nyawa", "Menyampaikan wahyu", "Membagi rezeki", "Meniup sangkakala"], a: 1 },
+              { q: "Malaikat Raqib bertugas...", o: ["Menjaga surga", "Mencatat amal buruk", "Mencatat amal baik", "Meniup sangkakala"], a: 2 },
+              { q: "Malaikat Ridwan bertugas...", o: ["Menjaga neraka", "Menjaga surga", "Mencabut nyawa", "Membagi rezeki"], a: 1 }
+            ]
+          },
+          {
+            judul: "Kisah Nabi Ibrahim AS", isi: "Nabi Ibrahim AS adalah Khalilullah (kekasih Allah).\n\n📖 Ibrahim menghancurkan berhala-berhala kaumnya\n📖 Dibakar oleh Raja Namrud tapi selamat atas perintah Allah\n📖 Allah berfirman: \"Wahai api, jadilah dingin dan keselamatan bagi Ibrahim\"\n📖 Membangun Ka'bah bersama putranya Ismail\n📖 Diperintah menyembelih Ismail, lalu diganti dengan domba\n📖 Peristiwa ini diperingati sebagai Idul Adha", soal: [
+              { q: "Ibrahim dikenal sebagai...", o: ["Khalilullah", "Ulul Azmi", "Kalimullah", "Dzun Nun"], a: 0 },
+              { q: "Raja yang membakar Ibrahim adalah...", o: ["Fir'aun", "Abrahah", "Namrud", "Jalut"], a: 2 },
+              { q: "Ibrahim membangun Ka'bah bersama...", o: ["Ishaq", "Ismail", "Luth", "Yakub"], a: 1 }
+            ]
+          },
+          {
+            judul: "Perilaku Terpuji: Jujur dan Amanah", isi: "**Jujur (Ash-Shidq):**\nBerkata dan berbuat sesuai kenyataan. Nabi Muhammad dikenal sebagai Al-Amin (yang dapat dipercaya).\n\nManfaat jujur:\n✅ Dipercaya orang lain\n✅ Hati tenang\n✅ Mendapat pahala dari Allah\n\n**Amanah:**\nMenjaga kepercayaan yang diberikan orang lain.\n\nContoh amanah:\n✅ Mengembalikan barang pinjaman\n✅ Menjaga rahasia teman\n✅ Menjalankan tugas dengan baik", soal: [
+              { q: "Al-Amin artinya...", o: ["Yang jujur", "Yang dipercaya", "Yang cerdas", "Yang penyabar"], a: 1 },
+              { q: "Lawan dari jujur adalah...", o: ["Amanah", "Sabar", "Dusta/Bohong", "Malas"], a: 2 },
+              { q: "Contoh amanah adalah...", o: ["Berbohong", "Mengembalikan barang pinjaman", "Mengambil hak orang", "Malas belajar"], a: 1 }
+            ]
+          }
+        ]
+      },
+      {
+        kelas: 5, emoji: "🌲", warna: "from-rose-400 to-pink-500", border: "border-rose-400", materi: [
+          {
+            judul: "Surah Al-Maun", isi: "Surah Al-Maun adalah surah ke-107, terdiri dari 7 ayat.\n\n**Lafaz:**\nأَرَءَيْتَ ٱلَّذِى يُكَذِّبُ بِٱلدِّينِ\nفَذَٰلِكَ ٱلَّذِى يَدُعُّ ٱلْيَتِيمَ\nوَلَا يَحُضُّ عَلَىٰ طَعَامِ ٱلْمِسْكِينِ\nفَوَيْلٌ لِّلْمُصَلِّينَ\nٱلَّذِينَ هُمْ عَن صَلَاتِهِمْ سَاهُونَ\nٱلَّذِينَ هُمْ يُرَآءُونَ\nوَيَمْنَعُونَ ٱلْمَاعُونَ\n\nSurah ini memperingatkan tentang orang yang mendustakan agama: tidak menyantuni anak yatim, lalai dalam shalat, dan riya.", soal: [
+              { q: "Al-Maun berarti...", o: ["Pertolongan kecil", "Manusia", "Gajah", "Waktu"], a: 0 },
+              { q: "Surah Al-Maun terdiri dari berapa ayat?", o: ["5", "6", "7", "8"], a: 2 },
+              { q: "Riya artinya...", o: ["Jujur", "Pamer", "Sabar", "Ikhlas"], a: 1 }
+            ]
+          },
+          {
+            judul: "Iman kepada Rasul Allah", isi: "Rasul adalah manusia pilihan yang menerima wahyu dan diperintahkan menyampaikannya.\n\n**25 Nabi & Rasul yang wajib diketahui:**\n1. Adam 2. Idris 3. Nuh 4. Hud 5. Shaleh\n6. Ibrahim 7. Luth 8. Ismail 9. Ishaq 10. Yakub\n11. Yusuf 12. Ayyub 13. Syu'aib 14. Musa 15. Harun\n16. Dzulkifli 17. Dawud 18. Sulaiman 19. Ilyas 20. Ilyasa\n21. Yunus 22. Zakaria 23. Yahya 24. Isa 25. Muhammad\n\n**Rasul Ulul Azmi** (yang memiliki keteguhan luar biasa):\nNuh, Ibrahim, Musa, Isa, Muhammad", soal: [
+              { q: "Ada berapa Nabi & Rasul yang wajib diketahui?", o: ["20", "25", "30", "10"], a: 1 },
+              { q: "Rasul terakhir adalah...", o: ["Isa", "Musa", "Muhammad", "Ibrahim"], a: 2 },
+              { q: "Nabi pertama adalah...", o: ["Nuh", "Ibrahim", "Adam", "Idris"], a: 2 },
+              { q: "Ulul Azmi berjumlah...", o: ["3", "4", "5", "6"], a: 2 }
+            ]
+          },
+          {
+            judul: "Iman kepada Kitab Allah", isi: "Allah menurunkan 4 kitab suci:\n\n📖 **Zabur** — diturunkan kepada Nabi Dawud AS\n📖 **Taurat** — diturunkan kepada Nabi Musa AS\n📖 **Injil** — diturunkan kepada Nabi Isa AS\n📖 **Al-Quran** — diturunkan kepada Nabi Muhammad SAW\n\nAl-Quran adalah kitab terakhir yang menyempurnakan kitab-kitab sebelumnya. Terdiri dari 30 juz, 114 surah, dan diturunkan selama 22 tahun 2 bulan 22 hari.", soal: [
+              { q: "Ada berapa kitab Allah yang wajib diimani?", o: ["2", "3", "4", "5"], a: 2 },
+              { q: "Kitab Zabur diturunkan kepada Nabi...", o: ["Musa", "Isa", "Dawud", "Muhammad"], a: 2 },
+              { q: "Al-Quran terdiri dari berapa surah?", o: ["100", "110", "114", "120"], a: 2 }
+            ]
+          },
+          {
+            judul: "Puasa Ramadhan", isi: "Puasa Ramadhan adalah kewajiban bagi setiap Muslim yang baligh dan berakal.\n\n**Rukun Puasa:**\n1. Niat di malam hari\n2. Menahan diri dari yang membatalkan puasa sejak terbit fajar hingga terbenam matahari\n\n**Yang Membatalkan Puasa:**\n❌ Makan dan minum dengan sengaja\n❌ Muntah dengan sengaja\n❌ Hilang akal\n\n**Sunnah Puasa:**\n✅ Makan sahur\n✅ Menyegerakan berbuka\n✅ Berdoa saat berbuka\n✅ Memberi makan orang berbuka", soal: [
+              { q: "Rukun puasa ada berapa?", o: ["1", "2", "3", "4"], a: 1 },
+              { q: "Waktu sahur adalah...", o: ["Pagi hari", "Sebelum fajar", "Sore hari", "Tengah malam"], a: 1 },
+              { q: "Yang membatalkan puasa adalah...", o: ["Tidur", "Makan sengaja", "Berdzikir", "Membaca Quran"], a: 1 }
+            ]
+          }
+        ]
+      },
+      {
+        kelas: 6, emoji: "🌟", warna: "from-amber-400 to-orange-500", border: "border-amber-400", materi: [
+          {
+            judul: "Surah Al-Kafirun", isi: "Surah Al-Kafirun adalah surah ke-109, terdiri dari 6 ayat.\n\n**Lafaz:**\nقُلْ يَـٰٓأَيُّهَا ٱلْكَـٰفِرُونَ\nلَآ أَعْبُدُ مَا تَعْبُدُونَ\nوَلَآ أَنتُمْ عَـٰبِدُونَ مَآ أَعْبُدُ\nوَلَآ أَنَا۠ عَابِدٌ مَّا عَبَدتُّمْ\nوَلَآ أَنتُمْ عَـٰبِدُونَ مَآ أَعْبُدُ\nلَكُمْ دِينُكُمْ وَلِىَ دِينِ\n\nSurah ini mengajarkan tentang toleransi: \"Bagimu agamamu, bagiku agamaku.\"", soal: [
+              { q: "Al-Kafirun berarti...", o: ["Orang mukmin", "Orang kafir", "Orang munafik", "Orang shaleh"], a: 1 },
+              { q: "Surah Al-Kafirun mengajarkan tentang...", o: ["Puasa", "Zakat", "Toleransi", "Haji"], a: 2 },
+              { q: "'Lakum diinukum waliya diin' artinya...", o: ["Bagimu agamamu bagiku agamaku", "Allah Maha Esa", "Semua agama sama", "Tidak ada Tuhan"], a: 0 }
+            ]
+          },
+          {
+            judul: "Iman kepada Hari Akhir", isi: "Hari Akhir (Yaumul Qiyamah) adalah hari berakhirnya kehidupan dunia.\n\n**Tanda-tanda Hari Akhir:**\n⚡ Matahari terbit dari barat\n⚡ Keluarnya Dajjal\n⚡ Turunnya Nabi Isa AS\n⚡ Keluarnya Ya'juj dan Ma'juj\n\n**Tahapan setelah kematian:**\n1️⃣ Alam Barzakh (alam kubur)\n2️⃣ Hari Kebangkitan (Yaumul Ba'ts)\n3️⃣ Hari Perhitungan (Yaumul Hisab)\n4️⃣ Surga atau Neraka", soal: [
+              { q: "Yaumul Qiyamah artinya...", o: ["Hari Raya", "Hari Kiamat", "Hari Jumat", "Hari Lahir"], a: 1 },
+              { q: "Alam setelah mati sebelum kiamat disebut...", o: ["Alam dunia", "Alam Barzakh", "Surga", "Neraka"], a: 1 },
+              { q: "Yaumul Hisab artinya hari...", o: ["Kebangkitan", "Perhitungan", "Pembalasan", "Penghancuran"], a: 1 }
+            ]
+          },
+          {
+            judul: "Iman kepada Qada dan Qadar", isi: "**Qada** adalah ketetapan Allah sejak zaman azali (sebelum terjadinya).\n**Qadar** adalah perwujudan ketetapan Allah dalam kehidupan.\n\n**Contoh Qada dan Qadar:**\n🌙 Jodoh dan rezeki sudah ditentukan Allah\n🌙 Ajal (kematian) sudah ditetapkan\n🌙 Manusia wajib berikhtiar (berusaha)\n\n**Sikap terhadap Qada dan Qadar:**\n✅ Berikhtiar dan berdoa\n✅ Bersyukur saat mendapat kebaikan\n✅ Bersabar saat mendapat musibah\n✅ Tidak putus asa", soal: [
+              { q: "Qada artinya...", o: ["Perwujudan takdir", "Ketetapan Allah", "Usaha manusia", "Doa"], a: 1 },
+              { q: "Qadar artinya...", o: ["Ketetapan", "Perwujudan ketetapan", "Doa", "Ibadah"], a: 1 },
+              { q: "Sikap terhadap musibah seharusnya...", o: ["Marah", "Putus asa", "Bersabar", "Menyalahkan orang lain"], a: 2 }
+            ]
+          },
+          {
+            judul: "Kisah Nabi Muhammad: Isra Mi'raj", isi: "**Isra Mi'raj** terjadi pada 27 Rajab, setahun sebelum hijrah.\n\n**Isra:** Perjalanan Nabi Muhammad dari Masjidil Haram (Mekkah) ke Masjidil Aqsha (Palestina) dalam satu malam.\n\n**Mi'raj:** Perjalanan dari Masjidil Aqsha naik ke Sidratul Muntaha (langit ke-7).\n\n**Peristiwa penting:**\n🌟 Nabi menerima perintah shalat 5 waktu\n🌟 Awalnya 50 waktu, dikurangi menjadi 5 waktu\n🌟 Menggunakan Buraq sebagai kendaraan\n🌟 Bertemu para nabi terdahulu di setiap langit", soal: [
+              { q: "Isra Mi'raj terjadi pada tanggal...", o: ["17 Ramadhan", "27 Rajab", "12 Rabiul Awal", "1 Muharram"], a: 1 },
+              { q: "Perintah yang diterima saat Mi'raj adalah...", o: ["Puasa", "Zakat", "Shalat 5 waktu", "Haji"], a: 2 },
+              { q: "Kendaraan Nabi saat Isra adalah...", o: ["Unta", "Kuda", "Buraq", "Kereta"], a: 2 },
+              { q: "Shalat awalnya diperintahkan sebanyak...", o: ["5 waktu", "10 waktu", "25 waktu", "50 waktu"], a: 3 }
+            ]
+          }
+        ]
+      }
+    ];
+
+    // ===== STATE =====
+    let currentView = 'home';
+    let selectedKelas = null;
+    let selectedMateri = null;
+    let quizState = { current: 0, score: 0, answers: [], mode: null, questions: [] };
+
+    // ===== CONFIG =====
+    const appTitle = 'PAI Padang Pintar';
+    const appTagline = 'Media Pembelajaran Interaktif';
+
+    // ===== RENDER HELPERS =====
+    function md(text) {
+      return text.replace(/\*\*(.*?)\*\*/g, '<strong class="text-amber-300">$1</strong>').replace(/\n/g, '<br>');
+    }
+
+    function showToast(msg, type = 'success') {
+      const t = document.createElement('div');
+      t.className = `toast ${type === 'success' ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'}`;
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 2000);
+    }
+
+    // ===== VIEWS =====
+    function goHome() { currentView = 'home'; selectedKelas = null; selectedMateri = null; render(); }
+    function selectKelas(k) { currentView = 'kelas'; selectedKelas = k; render(); }
+    function selectMateri(ki, mi) { currentView = 'materi'; selectedKelas = ki; selectedMateri = mi; render(); }
+    function startQuiz(ki, mi) {
+      const m = KELAS_DATA[ki].materi[mi];
+      quizState = { current: 0, score: 0, answers: [], mode: 'materi', questions: shuffleArr([...m.soal]) };
+      currentView = 'quiz'; render();
+    }
+    function startBankSoal(ki) {
+      const allQ = [];
+      KELAS_DATA[ki].materi.forEach(m => m.soal.forEach(s => allQ.push(s)));
+      quizState = { current: 0, score: 0, answers: [], mode: 'bank', questions: shuffleArr(allQ).slice(0, Math.min(15, allQ.length)) };
+      currentView = 'quiz'; render();
+    }
+    function shuffleArr(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[a[i], a[j]] = [a[j], a[i]] } return a; }
+
+    function render() {
+      const mc = document.getElementById('main-content');
+      const bc = document.getElementById('breadcrumb');
+      mc.innerHTML = '';
+      bc.classList.add('hidden');
+
+      if (currentView === 'home') renderHome(mc);
+      else if (currentView === 'kelas') renderKelas(mc, bc);
+      else if (currentView === 'materi') renderMateri(mc, bc);
+      else if (currentView === 'quiz') renderQuiz(mc, bc);
+      else if (currentView === 'result') renderResult(mc, bc);
+
+      lucide.createIcons();
+      mc.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function renderHome(mc) {
+      mc.innerHTML = `
+    <div class="fade-in text-center mb-8">
+      <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-4xl shadow-2xl pulse-glow font-amiri text-emerald-900 font-bold">ﷲ</div>
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-white mb-2">${appTitle}</h1>
+      <p class="text-emerald-300 font-medium">${appTagline}</p>
+      <p class="text-emerald-400 text-sm mt-1">SD Kelas 1 — 6</p>
+    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 fade-in">
+      ${KELAS_DATA.map((k, i) => `
+        <button onclick="selectKelas(${i})" class="card-hover rounded-2xl bg-gradient-to-br ${k.warna} p-5 text-white text-left shadow-lg">
+          <div class="text-3xl mb-2">${k.emoji}</div>
+          <div class="font-bold text-lg">Kelas ${k.kelas}</div>
+          <div class="text-white/80 text-xs mt-1">${k.materi.length} materi</div>
+        </button>
+      `).join('')}
+    </div>
+    <div class="mt-6 p-4 rounded-2xl bg-emerald-800/50 border border-emerald-700/50 fade-in">
+      <div class="flex items-center gap-2 mb-2">
+        <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+        <span class="text-amber-300 font-semibold text-sm">Fitur Aplikasi</span>
+      </div>
+      <div class="grid grid-cols-3 gap-3 text-center text-xs text-emerald-300">
+        <div><i data-lucide="book" class="w-5 h-5 mx-auto mb-1 text-emerald-400"></i>Materi Lengkap</div>
+        <div><i data-lucide="brain" class="w-5 h-5 mx-auto mb-1 text-emerald-400"></i>Kuis Interaktif</div>
+        <div><i data-lucide="layers" class="w-5 h-5 mx-auto mb-1 text-emerald-400"></i>Bank Soal</div>
+      </div>
+    </div>
+    <div class="mt-8 pt-6 border-t border-emerald-700/50 text-center">
+      <p class="text-emerald-400 text-xs">
+        <i data-lucide="zap" class="w-3 h-3 inline mr-1"></i>
+        Dikembangkan oleh <span class="text-amber-300 font-semibold">Tim IT KKG PAI Kota Padang</span>
+      </p>
+      <p class="text-emerald-500/60 text-[10px] mt-1">© 2024 — Media Pembelajaran Islam Berkualitas</p>
+    </div>
+  `;
+    }
+
+    function renderKelas(mc, bc) {
+      const k = KELAS_DATA[selectedKelas];
+      bc.classList.remove('hidden');
+      bc.innerHTML = `<span class="text-emerald-500">Kelas ${k.kelas}</span>`;
+      mc.innerHTML = `
+    <div class="fade-in">
+      <button onclick="goHome()" class="flex items-center gap-1 text-emerald-400 hover:text-emerald-300 text-sm font-medium mb-4 transition">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i> Kembali
+      </button>
+      <div class="flex items-center gap-3 mb-6">
+        <div class="text-4xl">${k.emoji}</div>
+        <div>
+          <h2 class="text-2xl font-bold text-white">Kelas ${k.kelas}</h2>
+          <p class="text-emerald-400 text-sm">${k.materi.length} materi pembelajaran</p>
+        </div>
+      </div>
+
+      <div class="space-y-3 mb-6">
+        ${k.materi.map((m, i) => `
+          <button onclick="selectMateri(${selectedKelas},${i})" class="card-hover w-full text-left rounded-xl bg-emerald-800/60 border border-emerald-700/40 p-4 flex items-center gap-3 transition hover:bg-emerald-800/80">
+            <div class="w-10 h-10 rounded-lg bg-gradient-to-br ${k.warna} flex items-center justify-center text-white font-bold text-sm shrink-0">${i + 1}</div>
+            <div class="flex-1 min-w-0">
+              <div class="text-white font-semibold text-sm truncate">${m.judul}</div>
+              <div class="text-emerald-400 text-xs">${m.soal.length} soal latihan</div>
+            </div>
+            <i data-lucide="chevron-right" class="w-4 h-4 text-emerald-500 shrink-0"></i>
+          </button>
+        `).join('')}
+      </div>
+
+      <button onclick="startBankSoal(${selectedKelas})" class="w-full rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-emerald-900 font-bold p-4 flex items-center justify-center gap-2 card-hover shadow-lg">
+        <i data-lucide="database" class="w-5 h-5"></i>
+        Bank Soal Kelas ${k.kelas} (${k.materi.reduce((a, m) => a + m.soal.length, 0)} Soal)
+      </button>
+    </div>
+  `;
+    }
+
+    function renderMateri(mc, bc) {
+      const k = KELAS_DATA[selectedKelas];
+      const m = k.materi[selectedMateri];
+      bc.classList.remove('hidden');
+      bc.innerHTML = `<span class="text-emerald-500">Kelas ${k.kelas}</span> <span class="text-emerald-700 mx-1">›</span> <span class="text-emerald-400">${m.judul}</span>`;
+      mc.innerHTML = `
+    <div class="fade-in">
+      <button onclick="selectKelas(${selectedKelas})" class="flex items-center gap-1 text-emerald-400 hover:text-emerald-300 text-sm font-medium mb-4 transition">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i> Kembali ke Kelas ${k.kelas}
+      </button>
+      <div class="rounded-2xl bg-emerald-800/60 border border-emerald-700/40 overflow-hidden">
+        <div class="bg-gradient-to-r ${k.warna} p-5">
+          <div class="text-white/80 text-xs font-medium">Kelas ${k.kelas}</div>
+          <h2 class="text-xl font-bold text-white">${m.judul}</h2>
+        </div>
+        <div class="p-5 text-emerald-100 text-sm leading-relaxed font-amiri" style="font-size:1.05em">
+          ${md(m.isi)}
+        </div>
+      </div>
+      <button onclick="startQuiz(${selectedKelas},${selectedMateri})" class="w-full mt-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold p-4 flex items-center justify-center gap-2 card-hover shadow-lg">
+        <i data-lucide="help-circle" class="w-5 h-5"></i>
+        Mulai Kuis (${m.soal.length} Soal)
+      </button>
+    </div>
+  `;
+    }
+
+    function renderQuiz(mc, bc) {
+      const qs = quizState.questions;
+      const ci = quizState.current;
+      const q = qs[ci];
+      bc.classList.remove('hidden');
+      bc.textContent = `Soal ${ci + 1}/${qs.length}`;
+
+      mc.innerHTML = `
+    <div class="fade-in">
+      <div class="flex items-center justify-between mb-4">
+        <span class="text-emerald-400 text-sm font-medium">Soal ${ci + 1} dari ${qs.length}</span>
+        <span class="text-amber-400 text-sm font-bold">Skor: ${quizState.score}</span>
+      </div>
+      <div class="w-full bg-emerald-900 rounded-full h-2 mb-6">
+        <div class="bg-gradient-to-r from-amber-400 to-emerald-400 h-2 rounded-full transition-all duration-500" style="width:${((ci + 1) / qs.length) * 100}%"></div>
+      </div>
+      <div class="rounded-2xl bg-emerald-800/60 border border-emerald-700/40 p-5 mb-4">
+        <p class="text-white font-semibold text-base">${q.q}</p>
+      </div>
+      <div class="space-y-3" id="quiz-options">
+        ${q.o.map((o, i) => `
+          <button onclick="answerQuiz(${i})" class="quiz-option w-full text-left rounded-xl border-2 border-emerald-700/40 bg-emerald-800/40 hover:bg-emerald-700/50 hover:border-emerald-500 p-4 text-emerald-100 font-medium text-sm flex items-center gap-3 transition" id="opt-${i}">
+            <span class="w-8 h-8 rounded-lg bg-emerald-700/60 flex items-center justify-center text-emerald-300 font-bold text-xs shrink-0">${String.fromCharCode(65 + i)}</span>
+            ${o}
+          </button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+    }
+
+    function answerQuiz(idx) {
+      const q = quizState.questions[quizState.current];
+      const correct = idx === q.a;
+      if (correct) quizState.score++;
+      quizState.answers.push({ q: q.q, selected: idx, correct: q.a, isCorrect: correct });
+
+      // highlight
+      document.querySelectorAll('#quiz-options button').forEach((b, i) => {
+        b.disabled = true;
+        b.style.pointerEvents = 'none';
+        if (i === q.a) b.className = 'quiz-option w-full text-left rounded-xl border-2 border-emerald-400 bg-emerald-600/50 p-4 text-white font-medium text-sm flex items-center gap-3';
+        else if (i === idx && !correct) b.className = 'quiz-option w-full text-left rounded-xl border-2 border-red-400 bg-red-900/30 p-4 text-red-300 font-medium text-sm flex items-center gap-3';
+      });
+
+      showToast(correct ? '✅ Benar!' : '❌ Salah!', correct ? 'success' : 'error');
+
+      setTimeout(() => {
+        quizState.current++;
+        if (quizState.current >= quizState.questions.length) { currentView = 'result'; render(); }
+        else render();
+      }, 1200);
+    }
+
+    function renderResult(mc, bc) {
+      const total = quizState.questions.length;
+      const score = quizState.score;
+      const pct = Math.round((score / total) * 100);
+      let grade, emoji, msg;
+      if (pct >= 90) { grade = 'A'; emoji = '🏆'; msg = 'Masya Allah, Luar Biasa!'; }
+      else if (pct >= 70) { grade = 'B'; emoji = '⭐'; msg = 'Alhamdulillah, Bagus!'; }
+      else if (pct >= 50) { grade = 'C'; emoji = '💪'; msg = 'Lumayan, Terus Belajar!'; }
+      else { grade = 'D'; emoji = '📖'; msg = 'Ayo Belajar Lagi!'; }
+
+      bc.classList.remove('hidden');
+      bc.textContent = 'Hasil Kuis';
+
+      mc.innerHTML = `
+    <div class="fade-in text-center">
+      <div class="text-6xl mb-3">${emoji}</div>
+      <h2 class="text-2xl font-extrabold text-white mb-1">${msg}</h2>
+      <p class="text-emerald-300 text-sm mb-6">Nilai: <span class="text-amber-400 font-bold text-lg">${grade}</span></p>
+
+      <div class="rounded-2xl bg-emerald-800/60 border border-emerald-700/40 p-6 mb-6 inline-block">
+        <div class="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-emerald-400">${score}/${total}</div>
+        <div class="text-emerald-400 text-sm mt-1">${pct}% Benar</div>
+      </div>
+
+      <div class="space-y-2 text-left mb-6 max-h-64 overflow-y-auto">
+        ${quizState.answers.map((a, i) => `
+          <div class="rounded-lg p-3 text-xs ${a.isCorrect ? 'bg-emerald-700/40 border border-emerald-600/40' : 'bg-red-900/30 border border-red-700/40'}">
+            <div class="flex items-start gap-2">
+              <span>${a.isCorrect ? '✅' : '❌'}</span>
+              <div>
+                <div class="text-white font-medium">${i + 1}. ${a.q}</div>
+                ${!a.isCorrect ? `<div class="text-red-300 mt-1">Jawabanmu: ${quizState.questions[i].o[a.selected]}</div><div class="text-emerald-300">Jawaban benar: ${quizState.questions[i].o[a.correct]}</div>` : ''}
+              </div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+
+      <div class="flex gap-3">
+        <button onclick="goHome()" class="flex-1 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-3 transition">
+          <i data-lucide="home" class="w-4 h-4 inline mr-1"></i> Beranda
+        </button>
+        <button onclick="${quizState.mode === 'bank' ? `startBankSoal(${selectedKelas})` : `startQuiz(${selectedKelas},${selectedMateri})`}" class="flex-1 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-emerald-900 font-bold py-3 transition card-hover">
+          <i data-lucide="refresh-cw" class="w-4 h-4 inline mr-1"></i> Ulangi
+        </button>
+      </div>
+    </div>
+  `;
+    }
+
+    // Initial render
+    render();
+  </script>
+  <script>(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'9f1af16fe3d2797b',t:'MTc3NzA5NDg5NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
+</body>
+
+</html>
